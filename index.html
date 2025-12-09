@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription aux Ateliers de Soutien</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .form-content {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .workshop-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        
+        .workshop-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+        
+        .workshop-card.full {
+            background: #ffe0e0;
+            border-color: #ffcccc;
+            opacity: 0.6;
+        }
+        
+        .workshop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .workshop-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge.available {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge.full {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .workshop-info {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .radio-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: normal;
+        }
+        
+        .radio-label input[type="radio"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        
+        .radio-label input[type="radio"]:disabled {
+            cursor: not-allowed;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .admin-section {
+            background: #f0f0f0;
+            padding: 30px;
+            border-top: 3px solid #667eea;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .admin-header h2 {
+            color: #333;
+        }
+        
+        .admin-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .admin-buttons button {
+            padding: 12px 20px;
+        }
+        
+        .stats {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .stats h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .password-section {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .password-section input {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Inscription aux Ateliers de Soutien</h1>
+            <p>Complétez le formulaire ci-dessous pour vous inscrire</p>
+        </div>
+        
+        <div class="form-content">
+            <div class="success-message" id="successMessage">
+                ✅ Votre inscription a été enregistrée avec succès !
+            </div>
+            <div class="error-message" id="errorMessage"></div>
+            
+            <form id="registrationForm">
+                <div class="form-group">
+                    <label for="lastName">Nom *</label>
+                    <input type="text" id="lastName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="firstName">Prénom *</label>
+                    <input type="text" id="firstName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="class">Classe *</label>
+                    <input type="text" id="class" required placeholder="Ex: 3ème A">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="votre.email@exemple.fr">
+                </div>
+                
+                <div class="form-group">
+                    <label>Choisissez un atelier *</label>
+                    <div id="workshopsContainer"></div>
+                </div>
+                
+                <button type="submit">S'inscrire</button>
+            </form>
+        </div>
+        
+        <div class="admin-section">
+            <div class="admin-header">
+                <h2>🔧 Administration</h2>
+            </div>
+
+            <div class="password-section">
+                <label for="adminPassword">Mot de passe administrateur :</label>
+                <input type="password" id="adminPassword" placeholder="Entrez le mot de passe">
+                <p style="margin-top: 10px; font-size: 14px; color: #666;">Mot de passe par défaut : <strong>admin123</strong></p>
+            </div>
+            
+            <div class="admin-buttons">
+                <button onclick="showRegistrations()">📊 Voir les inscriptions</button>
+                <button onclick="exportToExcel()">📥 Exporter en Excel</button>
+                <button onclick="resetData()">🗑️ Réinitialiser</button>
+                <button onclick="showConfig()">⚙️ Configurer</button>
+            </div>
+            
+            <div class="stats">
+                <h3>Statistiques</h3>
+                <div id="statsContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // CONFIGURATION - MODIFIEZ ICI VOS ATELIERS
+        // ========================================
+        const ADMIN_PASSWORD = "admin123"; // Changez ce mot de passe
+        
+        const workshops = [
+            {
+                id: 1,
+                name: "Mathématiques",
+                description: "Algèbre et géométrie",
+                maxStudents: 15,
+                schedule: "Lundi 16h-17h"
+            },
+            {
+                id: 2,
+                name: "Français",
+                description: "Expression écrite et grammaire",
+                maxStudents: 15,
+                schedule: "Mardi 16h-17h"
+            },
+            {
+                id: 3,
+                name: "Anglais",
+                description: "Conversation et vocabulaire",
+                maxStudents: 12,
+                schedule: "Mercredi 14h-15h"
+            },
+            {
+                id: 4,
+                name: "Physique-Chimie",
+                description: "Expériences et révisions",
+                maxStudents: 10,
+                schedule: "Jeudi 16h-17h"
+            }
+        ];
+        
+        // ========================================
+        // CODE DE L'APPLICATION
+        // ========================================
+        
+        let registrations = [];
+        
+        function loadData() {
+            const saved = localStorage.getItem('workshopRegistrations');
+            if (saved) {
+                registrations = JSON.parse(saved);
+            }
+        }
+        
+        function saveData() {
+            localStorage.setItem('workshopRegistrations', JSON.stringify(registrations));
+            updateStats();
+        }
+        
+        function getWorkshopCount(workshopId) {
+            return registrations.filter(r => r.workshopId === workshopId).length;
+        }
+        
+        function isWorkshopFull(workshopId) {
+            const workshop = workshops.find(w => w.id === workshopId);
+            return getWorkshopCount(workshopId) >= workshop.maxStudents;
+        }
+        
+        function renderWorkshops() {
+            const container = document.getElementById('workshopsContainer');
+            container.innerHTML = '';
+            
+            workshops.forEach(workshop => {
+                const count = getWorkshopCount(workshop.id);
+                const isFull = isWorkshopFull(workshop.id);
+                const available = workshop.maxStudents - count;
+                
+                const card = document.createElement('div');
+                card.className = `workshop-card ${isFull ? 'full' : ''}`;
+                
+                card.innerHTML = `
+                    <div class="workshop-header">
+                        <div class="workshop-title">${workshop.name}</div>
+                        <span class="badge ${isFull ? 'full' : 'available'}">
+                            ${isFull ? 'COMPLET' : `${available} place(s) disponible(s)`}
+                        </span>
+                    </div>
+                    <div class="workshop-info">
+                        ${workshop.description} • ${workshop.schedule}
+                    </div>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="workshop" value="${workshop.id}" 
+                                   ${isFull ? 'disabled' : ''} required>
+                            ${isFull ? 'Atelier complet' : 'Choisir cet atelier'}
+                        </label>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+        
+        function updateStats() {
+            const container = document.getElementById('statsContainer');
+            container.innerHTML = '';
+            
+            const totalRegistrations = registrations.length;
+            const statItem = document.createElement('div');
+            statItem.className = 'stat-item';
+            statItem.innerHTML = `
+                <strong>Total des inscriptions</strong>
+                <span>${totalRegistrations}</span>
+            `;
+            container.appendChild(statItem);
+            
+            workshops.forEach(workshop => {
+                const count = getWorkshopCount(workshop.id);
+                const statItem = document.createElement('div');
+                statItem.className = 'stat-item';
+                statItem.innerHTML = `
+                    <span>${workshop.name}</span>
+                    <span>${count} / ${workshop.maxStudents}</span>
+                `;
+                container.appendChild(statItem);
+            });
+        }
+
+        function checkAdminPassword() {
+            const password = document.getElementById('adminPassword').value;
+            if (password !== ADMIN_PASSWORD) {
+                alert('⛔ Mot de passe administrateur incorrect !');
+                return false;
+            }
+            return true;
+        }
+        
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                id: Date.now(),
+                lastName: document.getElementById('lastName').value,
+                firstName: document.getElementById('firstName').value,
+                class: document.getElementById('class').value,
+                email: document.getElementById('email').value,
+                workshopId: parseInt(document.querySelector('input[name="workshop"]:checked').value),
+                timestamp: new Date().toISOString()
+            };
+            
+            const workshop = workshops.find(w => w.id === formData.workshopId);
+            
+            if (isWorkshopFull(formData.workshopId)) {
+                showError('Désolé, cet atelier est maintenant complet.');
+                return;
+            }
+            
+            registrations.push(formData);
+            saveData();
+            
+            document.getElementById('successMessage').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'none';
+            }, 5000);
+            
+            this.reset();
+            renderWorkshops();
+        });
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = '⚠️ ' + message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showRegistrations() {
+            if (!checkAdminPassword()) return;
+            
+            if (registrations.length === 0) {
+                alert('Aucune inscription pour le moment.');
+                return;
+            }
+            
+            let message = '📋 LISTE DES INSCRIPTIONS\n\n';
+            
+            workshops.forEach(workshop => {
+                const workshopRegs = registrations.filter(r => r.workshopId === workshop.id);
+                message += `\n${workshop.name} (${workshopRegs.length}/${workshop.maxStudents}):\n`;
+                message += '─'.repeat(50) + '\n';
+                
+                if (workshopRegs.length === 0) {
+                    message += 'Aucune inscription\n';
+                } else {
+                    workshopRegs.forEach((reg, index) => {
+                        message += `${index + 1}. ${reg.firstName} ${reg.lastName} (${reg.class})`;
+                        if (reg.email) message += ` - ${reg.email}`;
+                        message += '\n';
+                    });
+                }
+            });
+            
+            alert(message);
+        }
+        
+        function exportToExcel() {
+            if (!checkAdminPassword()) return;
+            
+            if (registrations.length === 0) {
+                alert('Aucune inscription à exporter.');
+                return;
+            }
+            
+            const data = registrations.map(reg => {
+                const workshop = workshops.find(w => w.id === reg.workshopId);
+                return {
+                    'Nom': reg.lastName,
+                    'Prénom': reg.firstName,
+                    'Classe': reg.class,
+                    'Email': reg.email || '',
+                    'Atelier': workshop.name,
+                    'Horaire': workshop.schedule,
+                    'Date d\'inscription': new Date(reg.timestamp).toLocaleString('fr-FR')
+                };
+            });
+            
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Inscriptions");
+            
+            const date = new Date().toLocaleDateString('fr-FR').replace(/\//g, '-');
+            XLSX.writeFile(wb, `inscriptions_ateliers_${date}.xlsx`);
+        }
+        
+        function resetData() {
+            if (!checkAdminPassword()) return;
+            
+            if (confirm('⚠️ ATTENTION : Voulez-vous vraiment supprimer TOUTES les inscriptions ?\n\nCette action est irréversible.')) {
+                if (confirm('Êtes-vous absolument sûr(e) ?')) {
+                    registrations = [];
+                    saveData();
+                    renderWorkshops();
+                    alert('✅ Toutes les inscriptions ont été supprimées.');
+                }
+            }
+        }
+        
+        function showConfig() {
+            alert(`⚙️ CONFIGURATION DES ATELIERS
+
+Pour modifier les ateliers, ouvrez le fichier HTML dans un éditeur de texte et modifiez la section "CONFIGURATION" au début du script.
+
+Vous pouvez changer :
+- Les noms des ateliers
+- Les descriptions
+- Les horaires
+- Le nombre de places maximum
+- Ajouter ou supprimer des ateliers
+
+Exemple :
+{
+    id: 1,
+    name: "Mathématiques",
+    description: "Algèbre et géométrie",
+    maxStudents: 15,
+    schedule: "Lundi 16h-17h"
+}
+
+N'oubliez pas de changer le mot de passe administrateur !`);
+        }
+        
+        // Initialisation
+        loadData();
+        renderWorkshops();
+        updateStats();
+    </script>
+</body>
+</html>
